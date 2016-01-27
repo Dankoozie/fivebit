@@ -20,21 +20,25 @@ std_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q'
 std_ucase = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','[',chr(92),']','^')
 std_num = ('!',"\"" ,'#','$','%','&',"'",'(',')','*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',':', ';', "<",  "=",  ">",  "?",  "@")
 
-#7 = num  lock, 6 = caps lock
 std_decode =[(0,k) for k in std_chars] + [(1,None),(2,None),(3,None),(4,None),(5,None)]
-std_ucase_decode =  [(0,k) for k in std_ucase] + [(7,None),(6,None)]
+std_ucase_decode =  [(0,k) for k in std_ucase] + [(7,None),(6,None)] #7 = num  lock, 6 = caps lock
 lock_ucase_decode = [(6,k) for k in std_ucase] + [(6," "),(0,None)] # Space is (30) here - ^ ommited, 31 = release
 lock_num_decode = [(7,k) for k in std_num][:-1] + [(0,None)] # 31 = release
 
 #dict_reverse = dict((w,d) for d,w in dic1024.items())
 
 dic1024 = {}
-f = open('english-1.txt','r')
-for a in range(1024):
-	dic1024[a] = f.readline().strip()
-f.close()
+#f = open('english-1.txt','r')
+#for a in range(1024):
+#	dic1024[a] = f.readline().strip()
+#f.close()
 
-dict_reverse = dict((w,d) for d,w in dic1024.items())
+#f = open('english-1.txt','rb').read()
+#dic1024[a] = dict()
+
+#f.close()
+
+
 
 
 def load_dict(filename):
@@ -298,4 +302,25 @@ def compress(string,usedict = True):
 
 def decompress(string):
    return(s.desub(decode(string)))
+
+
+class DictTool:
+        def __init__(self):
+                pass
+        def list_to_5b(self,file):
+                k = open(file,'rb')
+                
+
+#k = ""
+#f = open('english-1.5b','wb')
+#for a in dic1024:
+#        k = k + dic1024[a] + " "
+#f.write(compress(k,False))
+#f.close()
+
+f = decompress(open('english-1.5b','rb').read())
+dh = f.split(" ")
+dic1024 = dict((dh.index(w),w) for w in dh)
+dict_reverse = dict((w,d) for d,w in dic1024.items())
+
 
