@@ -25,30 +25,6 @@ std_ucase_decode =  [(0,k) for k in std_ucase] + [(7,None),(6,None)] #7 = num  l
 lock_ucase_decode = [(6,k) for k in std_ucase] + [(6," "),(0,None)] # Space is (30) here - ^ ommited, 31 = release
 lock_num_decode = [(7,k) for k in std_num][:-1] + [(0,None)] # 31 = release
 
-#dict_reverse = dict((w,d) for d,w in dic1024.items())
-
-dic1024 = {}
-#f = open('english-1.txt','r')
-#for a in range(1024):
-#	dic1024[a] = f.readline().strip()
-#f.close()
-
-#f = open('english-1.txt','rb').read()
-#dic1024[a] = dict()
-
-#f.close()
-
-
-
-
-def load_dict(filename):
-    dic1024 = {}
-    f = open(filename,'r')
-    for i in range(0,1024):
-        cw = f.readline()
-        if(len(cw.rstrip()) > 2): dic1024[i] = cw.rstrip()
-	
-    dict_reverse = dict((w,d) for d,w in dic1024.items())      
 
 def shift(val,amt):
     if(amt >= 0):
@@ -58,7 +34,9 @@ def shift(val,amt):
 
 class Substitute:
     
-    def __init__(self):
+    def __init__(self,dict_tuple):
+        self.dic1024 = dict_tuple[0]
+        self.dict_reverse = dict_tuple[1]
         self.dict_last = False
         self.dict_fchar = 0
         self.unicode_len = 0
@@ -88,7 +66,7 @@ class Substitute:
             return((4,None))
         else:
             self.dict_last = False
-            return(0,dic1024[((self.dict_fchar << 5) | a)] + " ")
+            return(0,self.dic1024[((self.dict_fchar << 5) | a)] + " ")
 
     def __desub_twentynine(self,a):
         return((0,None))
@@ -139,7 +117,7 @@ class Substitute:
 
         #Cut off trailing space if last mode was a dictionary word
         if(len(cl) > 0):
-            if(cl[-1].strip() in dic1024.values()): cl[-1] = cl[-1].strip()
+            if(cl[-1].strip() in self.dic1024.values()): cl[-1] = cl[-1].strip()
 
         return "".join(cl)
 
@@ -150,7 +128,7 @@ class Substitute:
         ld = False
         ke = 0
 
-        dr = dict_reverse
+        dr = self.dict_reverse
         if(usedict == False): dr = dict()
         
         spl = strin.split(" ")
@@ -179,38 +157,21 @@ class Substitute:
     def __subpass_uppercase_strings(self,strin):
         pass
 
-
     def subbe(self,str_in):
         #Zero length string
         if(str_in == ""): return []
         cl = []
 
         for a in str_in:
-            #c_num = ord(a)
             try:
                 cl.append(std_chars.index(a))
-                #return cl
             except ValueError: 
-
-#            if(a in std_chars): cl.append(std_chars.index(a))
                 try:
                     cl.extend([27,std_ucase.index(a)])
-                #return cl 
                 except ValueError: 
-
-
-#            if(a in std_ucase): #Upper case (formerly and [\]^_`)
-#                cl.extend([27,std_ucase.index(a)])
-
                    try:
                        cl.extend([28,std_num.index(a)])
                    except: cl.extend(self.__gen_unicode(a))
-
-#            elif(a in std_num.values()): cl.extend(num_chars[c_num])
-
-            #else:
-                #UTF-8
-           #     cl.extend(self.__gen_unicode(a))
 
         return cl
 
@@ -293,9 +254,34 @@ def decode(string):
             ls.extend(rs[0])
     return ls
 
-s = Substitute()
 
+class DictTool:
+        def __init__(self):
+            self.subber = Substitute((dict(),dict()))
+        def from_list(self,file):
+                ls = dict()
+                k = open(file,'r')
+                for i in range(1024):
+                        ls[i] = k.readline().strip()
+                k.close()
+                return(ls)
+        def to_file(self,dic,outfile):
+            k = ""
+            f = open(outfile,'wb')
+            for a in dic:
+                k = k + dic[a] + " "
+            f.write(encode(self.subber.sub((k,False))))
+            f.close()
+        def from_file(self,file):
+            f = self.subber.desub(decode(open(file,'rb').read()))
+            dh = f.split(" ")
+            outdic = dict((dh.index(w),w) for w in dh[:-1]) # -1 is to prevent a '' being appended to end of dictionary
+            outrev = dict((w,d) for d,w in outdic.items())
+            return (outdic,outrev)
 
+d = DictTool()
+
+s = Substitute(d.from_file('english-1.5b'))
 
 def compress(string,usedict = True):
     return(encode(s.sub(string,usedict)))
@@ -304,23 +290,7 @@ def decompress(string):
    return(s.desub(decode(string)))
 
 
-class DictTool:
-        def __init__(self):
-                pass
-        def list_to_5b(self,file):
-                k = open(file,'rb')
-                
 
-#k = ""
-#f = open('english-1.5b','wb')
-#for a in dic1024:
-#        k = k + dic1024[a] + " "
-#f.write(compress(k,False))
-#f.close()
 
-f = decompress(open('english-1.5b','rb').read())
-dh = f.split(" ")
-dic1024 = dict((dh.index(w),w) for w in dh)
-dict_reverse = dict((w,d) for d,w in dic1024.items())
 
 

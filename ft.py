@@ -2,11 +2,6 @@ import time
 import fivebit as fivebit
 import entropy
 import random
-s = fivebit.Substitute()
-a = s.sub("tree")
-a = s.sub("bollix")
-print(s.desub(a))
-
 
 
 #Test routines
@@ -19,6 +14,17 @@ def teststr(lent=65536,low=26,high=128):
 print("Compressing random string 65536 characters, range 26-128 Dictionary on...")
 tstr = teststr()
 starttime = time.time()
+h = (fivebit.s.sub(tstr))
+
+
+for y in h:
+	if(y > 31): print(y,h.index(y))
+
+
+
+for u in range(256):
+	print(u, ": ", h.count(u))	
+
 d = fivebit.compress(tstr)
 print("Execution time: " + str(time.time() - starttime) + " compressed length: " +str(len(d))  )
 
@@ -27,6 +33,10 @@ starttime = time.time()
 dec = fivebit.decompress(d)
 print("Execution time: " + str(time.time() - starttime))
 print( dec==tstr)
+
+if(dec != tstr):
+	print(tstr)
+	print(dec)
 
 
 print("Compressing random string 65536 characters, range 26-128 Dictionary off...")
@@ -56,8 +66,10 @@ print("Uncompressed length: " + str(len(wordlist)) + " Dict compressed length: "
 #Random dictionary words
 lst = []
 print("\n\n\nGenerating 50000 lowercase random dictionary words..")
+fl = fivebit.d.from_file('english-1.5b')[0]
+
 for i in range(50000):	
-	lst.append(fivebit.dic1024[random.randrange(1024)] + " ")
+	lst.append(fl[random.randrange(1024)] + " ")
 
 starttime = time.time()
 fivebit.decompress(fivebit.compress("".join(lst)))
