@@ -1,5 +1,7 @@
-#Fivebit version 0.2g [27/01/2016] by Dankoozie
+#Fivebit version [01/02/2016] by Dankoozie
 # ---official site--- http://fivebit.download
+
+__version__ = '0.2h'
 
 #5bit encoding / compression
 #0-25 - abcdefghijklmnopqrstuvwxyz
@@ -15,6 +17,8 @@
 #31 - UTF-8 escape
 
 from math import ceil
+from sys import argv
+from os.path import isfile
 
 std_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',' ')
 std_ucase = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','[',chr(92),']','^')
@@ -289,7 +293,28 @@ def compress(string,usedict = True):
 def decompress(string):
    return(s.desub(decode(string)))
 
+def compressfile(path):
+	try:
+		uf = open(path,'r').read()
+	except:
+		print("Could not open file",path)
+	try:
+		of=open(path + ".5b",'wb')
+	except:
+		print("Could not open output", path + ".5b")
+	of.write(encode(s.sub(uf)))
+	of.close()
 
+def compresslist(sls):
+	for f in sls:
+		if(isfile(f)): compressfile(f)
+
+if __name__ == "__main__":
+	mode = 0
+	print("Fivebit text compressor", __version__, argv[1:])
+	if("-c" in argv): compresslist(argv[1:])
+	elif("-d" in argv):
+		mode = 2
 
 
 
