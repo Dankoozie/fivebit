@@ -1,4 +1,4 @@
-#Fivebit version [01/02/2016] by Dankoozie
+#Fivebit [01/02/2016] by Dankoozie
 # ---official site--- http://fivebit.download
 
 __version__ = '0.2h'
@@ -293,28 +293,51 @@ def compress(string,usedict = True):
 def decompress(string):
    return(s.desub(decode(string)))
 
+
+#Functions for use with CLI below here
 def compressfile(path):
 	try:
 		uf = open(path,'r').read()
 	except:
 		print("Could not open file",path)
+		return False
 	try:
 		of=open(path + ".5b",'wb')
 	except:
 		print("Could not open output", path + ".5b")
+		return False
 	of.write(encode(s.sub(uf)))
 	of.close()
+
+def decompressfile(path):
+	try:
+		uf = open(path,'r').read()
+	except:
+		print("Could not open file",path)
+		return False
+	try:
+		if(path[-3:] == ".5b"):
+			path = path[:-3]
+		of=open(path,'wb')
+	except:
+		print("Could not open output", path)
+		return False
+	of.write(s.desub(decode(uf)))
+	of.close()
+
 
 def compresslist(sls):
 	for f in sls:
 		if(isfile(f)): compressfile(f)
+def decompresslist(sls):
+        for f in sls:
+                if(isfile(f)): decompressfile(f)
+
 
 if __name__ == "__main__":
-	mode = 0
 	print("Fivebit text compressor", __version__, argv[1:])
 	if("-c" in argv): compresslist(argv[1:])
-	elif("-d" in argv):
-		mode = 2
+	elif("-d" in argv): decompresslist(argv[1:])
 
 
 
