@@ -1,7 +1,9 @@
-#Fivebit [01/02/2016] by Dankoozie
+#!/usr/bin/env python3
+
+#Fivebit [13/02/2016] by Dankoozie
 # ---official site--- http://fivebit.download
 
-__version__ = '0.2h'
+__version__ = '0.26'
 
 #5bit encoding / compression
 #0-25 - abcdefghijklmnopqrstuvwxyz
@@ -19,6 +21,7 @@ __version__ = '0.2h'
 from math import ceil
 from sys import argv
 from os.path import isfile
+from struct import pack,unpack
 
 std_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',' ')
 std_ucase = ('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','[',chr(92),']','^')
@@ -28,6 +31,54 @@ std_decode =[(0,k) for k in std_chars] + [(1,None),(2,None),(3,None),(4,None),(5
 std_ucase_decode =  [(0,k) for k in std_ucase] + [(7,None),(6,None)] #7 = num  lock, 6 = caps lock
 lock_ucase_decode = [(6,k) for k in std_ucase] + [(6," "),(0,None)] # Space is (30) here - ^ ommited, 31 = release
 lock_num_decode = [(7,k) for k in std_num][:-1] + [(0,None)] # 31 = release
+
+#URL compression
+urltypes = ['http://','ftp://','ftps://','mailto:','gopher://','sftp://','git://','magnet:','rsync://',"",'tftp://','file://','geo:','rtsp://','nntp://','telnet://','udp://']
+domain_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','-','.','@','/') #Any username part is included in the domain and not compressed separately
+
+#URL header format
+
+#|---------------------------------------------
+#|Header byte|(URL Scheme)|(pb1,2)|(tldcode
+#|
+#|
+
+#bit0 = Port y/n
+#bit1 = TLDcode y/n
+#bit2,3 = Initial format
+#bit4,5 = CC1 offset
+#bit6 = Change url scheme 
+
+#IF 	00 = Domain5
+#	01 = Reg5
+#	10 = IP6
+#	11 = Utf8
+'''
+
+def decompress_url(comp_str,default_url = 'https://'):
+	initial_decode = {0:decompress_d,1:decompress,2:de_ip6,3:de_utf}
+	second_decode = {0:decompress_d,1:decompress}
+	
+	d_str = ''
+	header = comp_str[1]
+        domain_start = 2
+
+	#Get URL type
+	if(header & 2):
+		d_str = urltypes[comp_str[1]]
+		domain_start += 1
+	else:
+		d_str = default_url
+
+	pb = header & 128
+	tldb = header & 64
+
+	if(pb): domain_start += 2
+	if(tldb): domain_start += 2
+
+	initial_format = (comp_str[0] >> 4) & 3
+
+'''
 
 
 def shift(val,amt):
@@ -178,6 +229,19 @@ class Substitute:
                    except: cl.extend(self.__gen_unicode(a))
 
         return cl
+
+    def sub_simple(self,str_in,charset):
+        #Zero length string
+        if(str_in == ""): return []
+        cl = []
+
+        for a in str_in:
+            try:
+                cl.append(charset.index(a))
+            except ValueError: 
+                return False
+        return cl
+        
 
 def encode(charlist):
     #Converts a list of 5-bit values (0-31) into byte string
@@ -334,11 +398,20 @@ def decompresslist(sls):
                 if(isfile(f)): decompressfile(f)
 
 
+def helptext():
+        print('''Usage: fivebit (options) [FILE LIST]
+                -c : Compress files
+                -d : Decompress files
+                -h : Show this help menu
+                ''')
+
+
 if __name__ == "__main__":
-	print("Fivebit text compressor", __version__, argv[1:])
+	print("Fivebit text compressor", __version__)
 	if("-c" in argv): compresslist(argv[1:])
 	elif("-d" in argv): decompresslist(argv[1:])
-
-
+	elif("-h" in argv): helptext()
+	elif("-s" in argv): print("Hi")
+       
 
 
