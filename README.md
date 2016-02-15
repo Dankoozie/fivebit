@@ -15,6 +15,7 @@ CLI Usage:
 ./fivebit e somefile.5b
 
 Module usage:
+
 import fivebit
 a = fivebit.compress("Your string to be compressed")
 print(fivebit.decompress(a))
