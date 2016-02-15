@@ -8,8 +8,13 @@ Fivebit can also be executed from the command line to compress files. Compressed
 CLI Usage:
 - Compress a bunch of textfiles
 
-# ./fivebit c *.txt
+./fivebit c *.txt
 
 - Decompress a file
 
-# ./fivebit e somefile.5b
+./fivebit e somefile.5b
+
+Module usage:
+import fivebit
+a = fivebit.compress("Your string to be compressed")
+print(fivebit.decompress(a))
