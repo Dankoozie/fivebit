@@ -5,3 +5,11 @@
 
 Fivebit can also be executed from the command line to compress files. Compressed files will be created with the '.5b' extension
 
+CLI Usage:
+- Compress a bunch of textfiles
+
+# ./fivebit c *.txt
+
+- Decompress a file
+
+# ./fivebit e somefile.5b

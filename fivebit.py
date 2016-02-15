@@ -3,7 +3,7 @@
 #Fivebit [13/02/2016] by Dankoozie
 # ---official site--- http://fivebit.download
 
-__version__ = '0.26'
+__version__ = '0.27'
 
 #5bit encoding / compression
 #0-25 - abcdefghijklmnopqrstuvwxyz
@@ -18,6 +18,7 @@ __version__ = '0.26'
 #30 - Dict1024
 #31 - UTF-8 escape
 
+import argparse
 from math import ceil
 from sys import argv
 from os.path import isfile
@@ -33,8 +34,8 @@ lock_ucase_decode = [(6,k) for k in std_ucase] + [(6," "),(0,None)] # Space is (
 lock_num_decode = [(7,k) for k in std_num][:-1] + [(0,None)] # 31 = release
 
 #URL compression
-urltypes = ['http://','ftp://','ftps://','mailto:','gopher://','sftp://','git://','magnet:','rsync://',"",'tftp://','file://','geo:','rtsp://','nntp://','telnet://','udp://']
-domain_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','-','.','@','/') #Any username part is included in the domain and not compressed separately
+urltypes = ['https://','http://','ftp://','ftps://','mailto:','gopher://','sftp://','git://','magnet:','rsync://',"",'tftp://','file://','geo:','rtsp://','nntp://','telnet://','udp://']
+domain_chars = ('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','-','.','@','/',':') #Any username part is included in the domain and not compressed separately
 
 #URL header format
 
@@ -230,7 +231,7 @@ class Substitute:
 
         return cl
 
-    def sub_simple(self,str_in,charset):
+    def sub_simple(self,str_in,charset): #Sub function for use with custom character sets, returns false on error
         #Zero length string
         if(str_in == ""): return []
         cl = []
@@ -359,30 +360,23 @@ def decompress(string):
 
 
 #Functions for use with CLI below here
-def compressfile(path):
+def compressfile(fo):
+	uf = fo.read()
 	try:
-		uf = open(path,'r').read()
+		of=open(fo.name + ".5b",'wb')
 	except:
-		print("Could not open file",path)
-		return False
-	try:
-		of=open(path + ".5b",'wb')
-	except:
-		print("Could not open output", path + ".5b")
+		print("Could not open output", fo.name + ".5b")
 		return False
 	of.write(encode(s.sub(uf)))
 	of.close()
 
-def decompressfile(path):
+def decompressfile(fo):
+	uf = fo.read()
 	try:
-		uf = open(path,'r').read()
-	except:
-		print("Could not open file",path)
-		return False
-	try:
-		if(path[-3:] == ".5b"):
-			path = path[:-3]
-		of=open(path,'wb')
+		if(fo.name[-3:] == ".5b"):
+			path = fo.name[:-3]
+		else: path = fo.name
+		of=open(path,'w')
 	except:
 		print("Could not open output", path)
 		return False
@@ -390,28 +384,22 @@ def decompressfile(path):
 	of.close()
 
 
-def compresslist(sls):
-	for f in sls:
-		if(isfile(f)): compressfile(f)
-def decompresslist(sls):
-        for f in sls:
-                if(isfile(f)): decompressfile(f)
-
-
-def helptext():
-        print('''Usage: fivebit (options) [FILE LIST]
-                -c : Compress files
-                -d : Decompress files
-                -h : Show this help menu
-                ''')
-
-
 if __name__ == "__main__":
-	print("Fivebit text compressor", __version__)
-	if("-c" in argv): compresslist(argv[1:])
-	elif("-d" in argv): decompresslist(argv[1:])
-	elif("-h" in argv): helptext()
-	elif("-s" in argv): print("Hi")
-       
+    filefunc = compressfile
+    arpr = argparse.ArgumentParser(description="Fivebit text compressor")
+
+    sp = arpr.add_subparsers()
+    parse_c = sp.add_parser('c',help="Compression mode")
+    parse_c.set_defaults(d=compressfile)
+    parse_c.add_argument('files',type=argparse.FileType('r'),help='Files to be compressed',nargs='*')
+
+    parse_e = sp.add_parser('e',help="Decompression mode")
+    parse_e.set_defaults(d=decompressfile)
+    parse_e.add_argument('files',type=argparse.FileType('rb'),help='Files to be decompressed',nargs='*')
+
+    args = arpr.parse_args()
+    for a in args.files:
+        args.d(a)    
+        
 
 
